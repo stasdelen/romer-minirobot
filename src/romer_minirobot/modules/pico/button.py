@@ -1,4 +1,5 @@
 from machine import Pin
+from utime import ticks_ms
 
 from ...urtps import EventPubNode
 
@@ -20,7 +21,7 @@ class Button(EventPubNode):
         # The button is named 'my_button'.
     """
 
-    def __init__(self, pin_number, mode, invert, poll_sec, name='button') -> None:
+    def __init__(self, pin_number, mode, invert, poll_ms = 500, repeat = 5, name='button') -> None:
         super().__init__(name, 'publishing')
         self.pin = Pin(pin_number, Pin.IN)
         if mode:
@@ -29,8 +30,12 @@ class Button(EventPubNode):
             elif mode == 'pull_down':
                 self.pin = Pin(pin_number, Pin.IN, Pin.PULL_DOWN)
         self.invert = not invert
-        self.poll_sec = poll_sec
+        self.poll_ms = poll_ms
+        self.repeat = repeat
         self.last_value = self.pin.value()
+        self.changed_state = False
+        self.last_time = ticks_ms()
+        self.repeats = 0
         
     async def tick(self):
         """
@@ -38,6 +43,19 @@ class Button(EventPubNode):
         """
         pin_val = self.pin.value()
         if pin_val != self.last_value:
+            self.changed_state = True
+            self.last_time = ticks_ms()
             self.last_value = not self.last_value
-            self.set_message(str(self.last_value == self.invert))
     
+
+        if not self.changed_state:
+            return
+        
+        if ticks_ms() - self.last_time < self.poll_ms:
+            if self.repeats < self.repeat:
+                self.set_message(str(self.last_value == self.invert))
+                self.last_time = ticks_ms()
+                self.repeats += 1
+            else:
+                self.repeats = 0
+                self.changed_state = False
