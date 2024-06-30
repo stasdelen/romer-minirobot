@@ -17,6 +17,6 @@ if __name__ == "__main__":
     urtps = uRTPS(SSID, PASSWORD, MULTICAST_GROUP, MULTICAST_TOPIC_PORT)
     
     urtps.add_subscribing_topics(NeoPixel(28, 18))
-    urtps.add_publishing_topics(Button(12, 'pull_up', True, 0.1, 'button1'))
+    urtps.add_publishing_topics(Button(16, 'pull_up', True, name = 'bumper'))
     
     urtps.start()

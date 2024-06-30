@@ -6,12 +6,18 @@ import time
 # Multicast group details
 MULTICAST_GROUP = '224.0.0.252'
 MULTICAST_TOPIC_PORT = 5007
+G = (0,255,0)
+R = (255,0,0)
 
 hardware_spec = {
     'drive': robot.Holonomic(),
+    'bumper': robot.Button('bumper'),
+    'neopixel' : robot.NeoPixel(18, 0.5, name = 'headlight'),
 }
 
 r = MiniRobot(hardware_spec, MULTICAST_GROUP, MULTICAST_TOPIC_PORT)
+r.neopixel.fill_with(G)
+r.neopixel.write()
 
 x_linear_speed, y_linear_speed, z_angular_speed = 1, 1, 1
 
@@ -51,7 +57,14 @@ if __name__ == "__main__":
     with keyboard.Listener(
             on_press=on_press,
             on_release=on_release) as listener:
-        listener.join()
+        # listener.join()
+        while True:
+            if r.bumper.get():
+                r.neopixel.fill_with(R)
+            else:
+                r.neopixel.fill_with(G)
+            r.neopixel.write()
+            time.sleep(0.3)
 
         
 

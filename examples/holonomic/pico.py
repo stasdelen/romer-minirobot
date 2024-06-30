@@ -1,5 +1,5 @@
 from romer_minirobot.urtps import uRTPS
-from romer_minirobot.modules.pico import Holonomic, Button
+from romer_minirobot.modules.pico import Holonomic, Button, NeoPixel
 from machine import Pin
 
 SSID = "mechalab_intra"
@@ -16,7 +16,10 @@ MULTICAST_TOPIC_PORT = 5007
 
 urtps = uRTPS(SSID, PASSWORD, MULTICAST_GROUP, MULTICAST_TOPIC_PORT)
 urtps.add_subscribing_topics(Holonomic())
+urtps.add_subscribing_topics(NeoPixel(28, 18, name = 'headlight'))
+# urtps.add_publishing_topics(Button(12, Pin.PULL_UP, True, 0.1, 'isButtonPressed'))
+    
+# urtps.add_publishing_topics(Button(12, 'pull_up', True, 0.1, 'button1'))
+urtps.add_publishing_topics(Button(16, 'pull_up', True, name = 'bumper'))
 
-urtps.add_publishing_topics(Button(12, Pin.PULL_UP, True, 0.1, 'isButtonPressed'))
-
-urtps._start_async_main()
+urtps.start()
